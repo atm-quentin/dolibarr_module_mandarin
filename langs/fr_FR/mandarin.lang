@@ -106,6 +106,12 @@ permGraphProjectByUser=Autoriser la visualisation du graphique projets par comme
 titleGraphProjectByTypeShort=Nombre de projets par statut d'opportunité
 titleGraphProjectByType=Graphique du nombre de projets par statut d'opportunité
 
+# RAPPORT MARGIN SIMULATION BY USER
+permGraphMarginSimulationByUser = Autoriser la visualisation du rapport marge simulation par commerciaux (menu projets)
+linkMenuMarginSimulationByUserReportShort = Marge de simulations par commercial
+titleGraphMarginByUserByDraft = Graphique des marges en fonction des simulations brouillons
+
+
 #Cost Price
 set_MANDARIN_TRACE_COST_PRICE=Tracer les prix de revient
 GraphTraceCostPrice=Analyse des prix de revient

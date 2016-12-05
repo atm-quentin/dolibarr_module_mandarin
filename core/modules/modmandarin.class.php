@@ -261,6 +261,13 @@ class modmandarin extends DolibarrModules
 		$this->rights[$r][4] = 'graph';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = 'project_by_user';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
+		
+		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = $langs->transnoentitiesnoconv('permGraphMarginSimulationByUser');	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'graph';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][5] = 'margin_simulation_by_user';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$r++;
 
         $this->rights[$r][0] = $this->numero . $r;      // Permission id (must not be already used)
         $this->rights[$r][1] = 'costPriceTraceGraph';
@@ -426,6 +433,21 @@ class modmandarin extends DolibarrModules
 			'position'=>290,
 			'enabled'=>'$conf->mandarin->enabled',	// Define condition to show or hide menu entry. Use '$conf->mandarin->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->mandarin->graph->project_by_user',			                // Use 'perms'=>'$user->rights->mandarin->level1->level2' if you want your menu with a permission rules
+			'target'=>'',
+			'user'=>2				                // 0=Menu for internal users, 1=external users, 2=both
+		);
+		$r++;
+		
+		$this->menu[$r]=array('fk_menu'=>'fk_mainmenu=project,fk_leftmenu=projects',			                // Put 0 if this is a top menu
+			'type'=>'left',			                // This is a Top menu entry
+			'titre'=>$langs->transnoentitiesnoconv('linkMenuMarginSimulationByUserReportShort'),
+			'mainmenu'=>'',
+			'leftmenu'=>'',
+			'url'=>'/mandarin/graph_margin_simulation_by_user.php',
+			'langs'=>'mandarin@mandarin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position'=>310,
+			'enabled'=>'$conf->mandarin->enabled',	// Define condition to show or hide menu entry. Use '$conf->mandarin->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->mandarin->graph->margin_simulation_by_user',			                // Use 'perms'=>'$user->rights->mandarin->level1->level2' if you want your menu with a permission rules
 			'target'=>'',
 			'user'=>2				                // 0=Menu for internal users, 1=external users, 2=both
 		);
