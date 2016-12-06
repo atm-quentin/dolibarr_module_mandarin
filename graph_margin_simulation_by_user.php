@@ -116,7 +116,7 @@ function getSqlForData($userid=0,$object_statut='',$monthBeginning=0,$yearBeginn
 		$sql.= ' OR (p.fk_statut=1 AND DATE_FORMAT(p.date_valid,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.date_valid,\'%Y%m\')<='.$dateBeginning.')';
 		$sql.= ' OR (p.fk_statut=2 AND DATE_FORMAT(p.date_cloture,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.date_cloture,\'%Y%m\')<='.$dateBeginning.'))';
 	}
-	
+	$sql.=' ORDER BY p.datec DESC'; 
 	return $sql;
 }
 
@@ -127,6 +127,7 @@ function draw_table(&$TData, &$mesTabs) {
 	global $db, $langs;
 	
 	$langs->load('agenda');
+
 	print '<table class="noborder" width="100%">';
 	
 	$TFkStatutOpportunite = array_keys($TData);
