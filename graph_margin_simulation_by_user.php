@@ -4,40 +4,69 @@ require('config.php');
 dol_include_once('/clibip/class/clibip.class.php');
 dol_include_once('/comm/propal/class/propal.class.php');
 dol_include_once('/core/class/html.form.class.php');
+dol_include_once('/core/class/html.formpropal.class.php');
+dol_include_once('/core/class/html.formother.class.php');
 
 if (!$user->rights->mandarin->graph->margin_simulation_by_user) accessforbidden();
 $langs->load('mandarin@mandarin');
 
 $userid = GETPOST('userid');
+$object_statut=GETPOST('propal_statut');
+$monthBeginning=GETPOST('monthBeginning');
+$yearBeginning=GETPOST('yearBeginning');
+$monthEnding=GETPOST('monthEnding');
+$yearEnding=GETPOST('yearEnding');
 // Begin of page
 llxHeader('', $langs->trans('linkMenuMarginSimulationByUserReportShort'), '');
 
 print dol_get_fiche_head('linkMenuMarginSimulationByUserReportShort');
 print_fiche_titre($langs->trans('linkMenuMarginSimulationByUserReportShort'));
 
-print_form_filter($userid);
+print_form_filter($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding);
 
-$TData = get_data_tab($user->id);
-$TGraph = draw_table($TData);
+$TData = get_data_tab($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding);
+$mesTabs = new stdClass;
+draw_table($TData, $mesTabs);
 print '<br />';
-exit;
-draw_graphique($TGraph);
+
+draw_graphique($mesTabs);
 
 llxFooter();
 
-function print_form_filter($userid) {
+function print_form_filter($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding) {
 	
 	global $db, $langs;
 	
 	$langs->load('users');
+	$langs->load('agenda');
 	
 	$form = new Form($db);
-	
+	$formPropal = new FormPropal($db);
+	$formother = new FormOther($db);
 	print '<form name="filter" methode="GET" action="'.$_SERVER['PHP_SELF'].'">';
 	
 	print $langs->trans('User');
 	
 	print $form->select_dolusers($userid, 'userid', 1, '', 0, '', '', 0, 0, 0, '', 0, '', '', 1);
+	print "\t";
+	
+	print $langs->trans('State');
+	print "\t";
+	print $formPropal->selectProposalStatus($object_statut,1);
+	print "\t";
+	print $langs->trans('DateActionStart');
+	print "\t";
+	//print '<input class="flat" type="text" size="1" maxlength="2" name="dayBeginning" value="'.$dayBeginning.'">';
+	print '<input class="flat" type="text" size="1" maxlength="2" name="monthBeginning" value="'.$monthBeginning.'">';
+	
+	$formother->select_year($yearBeginning,'yearBeginning',1, 20, 5);
+	print "\t";
+	print $langs->trans('DateActionEnd');
+	print "\t";
+	//print '<input class="flat" type="text" size="1" maxlength="2" name="dayEnding" value="'.$dayEnding.'">';
+	print '<input class="flat" type="text" size="1" maxlength="2" name="monthEnding" value="'.$monthEnding.'">';
+	$formother->select_year($yearEnding,'yearEnding',1, 20, 5);
+	
 	
 	print '<br /><br />';
 	
@@ -49,13 +78,13 @@ function print_form_filter($userid) {
 	
 }
 
-function get_data_tab($userid=0) {
+function get_data_tab($userid=0,$object_statut='',$monthBeginning=0,$yearBeginning=0,$monthEnding=0,$yearEnding=0) {
 	
 	global $db;
 	
 	$TData = array();
 	
-	$sql = getSqlForData($userid);
+	$sql = getSqlForData($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding );
 	$resql = $db->query($sql);
 	while($res = $db->fetch_object($resql)) $TData[] = $res;
 	
@@ -63,27 +92,41 @@ function get_data_tab($userid=0) {
 	
 }
 
-function getSqlForData($userid=0)
+function getSqlForData($userid=0,$object_statut='',$monthBeginning=0,$yearBeginning=0,$monthEnding=0,$yearEnding=0)
 {
-	$sql = 'SELECT DISTINCT s.fk_propal,p.fk_soc, soc.nom, p.fk_user_author, u.lastname,p.fk_statut 
+	$sql = 'SELECT DISTINCT s.fk_propal,p.fk_soc, soc.nom, p.fk_user_author, u.lastname,p.fk_statut ,p.datec,p.date_valid,p.date_cloture
 			FROM `'.MAIN_DB_PREFIX.'simulation_clibip` s 
 			LEFT JOIN  `'.MAIN_DB_PREFIX.'propal` p ON (s.fk_propal = p.rowid)
 			LEFT JOIN  `'.MAIN_DB_PREFIX.'user` u ON (p.fk_user_author = u.rowid)
-			LEFT JOIN  `'.MAIN_DB_PREFIX.'societe` soc ON (p.fk_soc = soc.rowid)';
-
-	//if($userid > 0) $sql.= ' WHERE p.fk_user_author = '.$userid;
+			LEFT JOIN  `'.MAIN_DB_PREFIX.'societe` soc ON (p.fk_soc = soc.rowid)
+			WHERE 1';
+	
+	if($userid > 0) $sql.= ' AND p.fk_user_author = '.$userid;
+	if(($object_statut)!='') $sql.=' AND p.fk_statut='.$object_statut;
+	if(!empty($monthBeginning)&&!empty($yearBeginning)&&!empty($monthEnding)&&!empty($yearEnding)){
+		if($monthBeginning <10){
+			$monthBeginning = '0'.$monthBeginning;
+		}
+		if($monthEnding <10){
+			$monthEnding = '0'.$monthEnding;
+		}
+		$dateBeginning = $yearBeginning.''.$monthBeginning;
+		$dateEnding = $yearEnding.''.$monthEnding;
+		$sql.= ' AND ((p.fk_statut=0 AND DATE_FORMAT(p.datec,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.datec,\'%Y%m\')<='.$dateBeginning.')';
+		$sql.= ' OR (p.fk_statut=1 AND DATE_FORMAT(p.date_valid,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.date_valid,\'%Y%m\')<='.$dateBeginning.')';
+		$sql.= ' OR (p.fk_statut=2 AND DATE_FORMAT(p.date_cloture,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.date_cloture,\'%Y%m\')<='.$dateBeginning.'))';
+	}
 	
 	return $sql;
 }
 
 
 
-function draw_table(&$TData) {
+function draw_table(&$TData, &$mesTabs) {
 	
 	global $db, $langs;
 	
 	$langs->load('agenda');
-	
 	print '<table class="noborder" width="100%">';
 	
 	$TFkStatutOpportunite = array_keys($TData);
@@ -254,9 +297,10 @@ function draw_table(&$TData) {
 		
 		print '</table>';
 		
-		array_push($tabDraft,$tabValidated,$tabSigned);
+		$mesTabs->draft=$tabDraft;
+		$mesTabs->validated=$tabValidated;
+		$mesTabs->signed = $tabSigned;
 		
-		return $tabDraft;
 		
 	}
 
@@ -265,24 +309,46 @@ function draw_graphique(&$TData) {
 	global $langs;
 	
 	$PDOdb = new TPDOdb;
-	
-	$TSum = array();
-
 	$i = 0;
-	while($i<){
-		
-	}
-	
-	$listeview = new TListviewTBS('graphProjectByType');
-	
-	print $listeview->renderArray($PDOdb, $TSum
+
+	print '<table class="noborder" width="100%">';
+	$listeview = new TListviewTBS('graphMarginByDraft');
+	print '<tr >';
+	print '<td width=width=33%>';
+	print $listeview->renderArray($PDOdb, $TData->draft
 		,array(
 			'type' => 'chart'
 			,'chartType' => 'PieChart'
 			,'liste'=>array(
-				'titre'=>$langs->transnoentitiesnoconv('titleGraphMarginByUserByStateProject')
+				'titre'=>$langs->transnoentitiesnoconv('titleGraphMarginByUserByDraftSimulation')
 			)
 		)
 	);
-	
+	print '</td>';
+	print '<td width=33%>';
+	$listeview2 = new TListviewTBS('graphMarginByValidated');
+	print $listeview2->renderArray($PDOdb, $TData->validated
+		,array(
+			'type' => 'chart'
+			,'chartType' => 'PieChart'
+			,'liste'=>array(
+				'titre'=>$langs->transnoentitiesnoconv('titleGraphMarginByUserByValidatedSimulation')
+			)
+		)
+	);
+	print '</td>';
+	print '<td width=33%>';
+	$listeview3 = new TListviewTBS('graphMarginBySigned');
+	print $listeview3->renderArray($PDOdb, $TData->signed
+		,array(
+			'type' => 'chart'
+			,'chartType' => 'PieChart'
+			,'liste'=>array(
+				'titre'=>$langs->transnoentitiesnoconv('titleGraphMarginByUserBySignedSimulation')
+			)
+		)
+	);
+	print '</td>';
+	print '</tr>';
+	print "</table>";
 }

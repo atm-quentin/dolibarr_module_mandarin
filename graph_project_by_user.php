@@ -19,6 +19,7 @@ print_fiche_titre($langs->trans('linkMenuProjectByUserReport'));
 print_form_filter($userid);
 
 $TData = get_data_tab($userid);
+var_dump($TData);
 draw_table($TData, get_list_id_user($TData), get_tab_label_statut_opportunite());
 
 print '<br />';
@@ -247,7 +248,7 @@ function draw_graphique(&$TData, &$TabTrad) {
 		if (empty($TabTrad[$code]['label'])) continue;
 		$TSum[] = array($TabTrad[$code]['label'], array_sum($Tab));
 	}
-
+	var_dump($TSum);exit;
 	$listeview = new TListviewTBS('graphProjectByType');
 	
 	print $listeview->renderArray($PDOdb, $TSum
