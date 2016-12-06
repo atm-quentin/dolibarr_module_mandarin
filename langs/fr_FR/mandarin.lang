@@ -109,9 +109,9 @@ titleGraphProjectByType=Graphique du nombre de projets par statut d'opportunité
 # RAPPORT MARGIN SIMULATION BY USER
 permGraphMarginSimulationByUser = Autoriser la visualisation du rapport marge simulation par commerciaux (menu projets)
 linkMenuMarginSimulationByUserReportShort = Marge de simulations par commercial
-titleGraphMarginByUserByDraftSimulation = Graphique des marges en fonction des simulations brouillons
-titleGraphMarginByUserBySignedSimulation = Graphique des marges en fonction des simulations signés
-titleGraphMarginByUserByValidatedSimulation = Graphique des marges en fonction des simulations validés
+titleGraphMarginByUserByDraftSimulation = Marges par commerciaux par simulations brouillons
+titleGraphMarginByUserBySignedSimulation =  Marges par commerciaux par simulations signés
+titleGraphMarginByUserByValidatedSimulation =  Marges par commerciaux par simulations validés
 Signed = Signé
 Not Signed = Non Signé
 State = Etat 

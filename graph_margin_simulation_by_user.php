@@ -22,9 +22,9 @@ llxHeader('', $langs->trans('linkMenuMarginSimulationByUserReportShort'), '');
 print dol_get_fiche_head('linkMenuMarginSimulationByUserReportShort');
 print_fiche_titre($langs->trans('linkMenuMarginSimulationByUserReportShort'));
 
-print_form_filter($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding);
+print_form_filter($userid,$object_statut);
 
-$TData = get_data_tab($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding);
+$TData = get_data_tab($userid,$object_statut);
 $mesTabs = new stdClass;
 draw_table($TData, $mesTabs);
 print '<br />';
@@ -33,7 +33,7 @@ draw_graphique($mesTabs);
 
 llxFooter();
 
-function print_form_filter($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding) {
+function print_form_filter($userid,$object_statut) {
 	
 	global $db, $langs;
 	
@@ -49,27 +49,29 @@ function print_form_filter($userid,$object_statut,$monthBeginning,$yearBeginning
 	
 	print $form->select_dolusers($userid, 'userid', 1, '', 0, '', '', 0, 0, 0, '', 0, '', '', 1);
 	print "\t";
-	
+	print '<br />';
+	print '<br />';
 	print $langs->trans('State');
 	print "\t";
 	print $formPropal->selectProposalStatus($object_statut,1);
 	print "\t";
-	print $langs->trans('DateActionStart');
-	print "\t";
-	//print '<input class="flat" type="text" size="1" maxlength="2" name="dayBeginning" value="'.$dayBeginning.'">';
-	print '<input class="flat" type="text" size="1" maxlength="2" name="monthBeginning" value="'.$monthBeginning.'">';
-	
-	$formother->select_year($yearBeginning,'yearBeginning',1, 20, 5);
-	print "\t";
-	print $langs->trans('DateActionEnd');
-	print "\t";
-	//print '<input class="flat" type="text" size="1" maxlength="2" name="dayEnding" value="'.$dayEnding.'">';
-	print '<input class="flat" type="text" size="1" maxlength="2" name="monthEnding" value="'.$monthEnding.'">';
-	$formother->select_year($yearEnding,'yearEnding',1, 20, 5);
+	print '<br />';
+	print '<br />';
 	
 	
-	print '<br /><br />';
 	
+	
+	$date_deb = explode('/', $_REQUEST['date_deb']);
+	$date_deb = implode('/', array_reverse($date_deb));
+	$date_fin = explode('/', $_REQUEST['date_fin']);
+	$date_fin = implode('/', array_reverse($date_fin));
+	
+	print 'Du ';
+	$form->select_date(strtotime($date_deb), 'date_deb');
+	print 'Au ';
+	$form->select_date(strtotime($date_fin), 'date_fin');
+	print '<br />';	
+	print '<br />';
 	print '<input type="SUBMIT" class="butAction" value="Filtrer" />';
 	
 	print '</form>';
@@ -78,13 +80,13 @@ function print_form_filter($userid,$object_statut,$monthBeginning,$yearBeginning
 	
 }
 
-function get_data_tab($userid=0,$object_statut='',$monthBeginning=0,$yearBeginning=0,$monthEnding=0,$yearEnding=0) {
+function get_data_tab($userid=0,$object_statut='') {
 	
 	global $db;
 	
 	$TData = array();
 	
-	$sql = getSqlForData($userid,$object_statut,$monthBeginning,$yearBeginning,$monthEnding,$yearEnding );
+	$sql = getSqlForData($userid,$object_statut);
 	$resql = $db->query($sql);
 	while($res = $db->fetch_object($resql)) $TData[] = $res;
 	
@@ -92,7 +94,7 @@ function get_data_tab($userid=0,$object_statut='',$monthBeginning=0,$yearBeginni
 	
 }
 
-function getSqlForData($userid=0,$object_statut='',$monthBeginning=0,$yearBeginning=0,$monthEnding=0,$yearEnding=0)
+function getSqlForData($userid=0,$object_statut='')
 {
 	$sql = 'SELECT DISTINCT s.fk_propal,p.fk_soc, soc.nom, p.fk_user_author, u.lastname,p.fk_statut ,p.datec,p.date_valid,p.date_cloture
 			FROM `'.MAIN_DB_PREFIX.'simulation_clibip` s 
@@ -103,20 +105,21 @@ function getSqlForData($userid=0,$object_statut='',$monthBeginning=0,$yearBeginn
 	
 	if($userid > 0) $sql.= ' AND p.fk_user_author = '.$userid;
 	if(($object_statut)!='') $sql.=' AND p.fk_statut='.$object_statut;
-	if(!empty($monthBeginning)&&!empty($yearBeginning)&&!empty($monthEnding)&&!empty($yearEnding)){
-		if($monthBeginning <10){
-			$monthBeginning = '0'.$monthBeginning;
-		}
-		if($monthEnding <10){
-			$monthEnding = '0'.$monthEnding;
-		}
-		$dateBeginning = $yearBeginning.''.$monthBeginning;
-		$dateEnding = $yearEnding.''.$monthEnding;
-		$sql.= ' AND ((p.fk_statut=0 AND DATE_FORMAT(p.datec,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.datec,\'%Y%m\')<='.$dateBeginning.')';
-		$sql.= ' OR (p.fk_statut=1 AND DATE_FORMAT(p.date_valid,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.date_valid,\'%Y%m\')<='.$dateBeginning.')';
-		$sql.= ' OR (p.fk_statut=2 AND DATE_FORMAT(p.date_cloture,\'%Y%m\')>='.$dateEnding.' AND DATE_FORMAT(p.date_cloture,\'%Y%m\')<='.$dateBeginning.'))';
+
+	if(!empty($_REQUEST['date_deb'])){
+		
+		 $dateBeginning= $_REQUEST['date_debyear'].''.$_REQUEST['date_debmonth'].''.$_REQUEST['date_debday'];
+		$sql.= ' AND ((p.fk_statut=0 AND DATE_FORMAT(p.datec,\'%Y%m%d\')>='.$dateBeginning.' )';
+		$sql.= ' OR (p.fk_statut=1 AND DATE_FORMAT(p.date_valid,\'%Y%m%d\')>='.$dateBeginning.')';
+		$sql.= ' OR (p.fk_statut=2 AND DATE_FORMAT(p.date_cloture,\'%Y%m%d\')>='.$dateBeginning.'))';
 	}
-	$sql.=' ORDER BY p.datec DESC'; 
+	if(!empty($_REQUEST['date_fin'])){
+		$dateEnding = $_REQUEST['date_finyear'].''.$_REQUEST['date_finmonth'].''.$_REQUEST['date_finday'];
+		$sql.= ' AND ((p.fk_statut=0 AND DATE_FORMAT(p.datec,\'%Y%m%d\')<='.$dateEnding.')';
+		$sql.= ' OR (p.fk_statut=1 AND DATE_FORMAT(p.date_valid,\'%Y%m%d\')<='.$dateEnding.')';
+		$sql.= ' OR (p.fk_statut=2 AND DATE_FORMAT(p.date_cloture,\'%Y%m%d\')<='.$dateEnding.'))';
+		
+	}
 	return $sql;
 }
 
@@ -143,7 +146,7 @@ function draw_table(&$TData, &$mesTabs) {
 	print '<td>';	
 	print $langs->trans('Customer');		
 	print '</td>';
-	print '<td>';	
+	print '<td >';	
 	print $langs->trans('Simulation');		
 	print '</td>';
 	print '<td>';	
@@ -194,59 +197,42 @@ function draw_table(&$TData, &$mesTabs) {
 			
 			$clibip->loadByPropalAndNumAffaire($PDOdb, $prop, 1);
 			$clibip->montant_solde_integre = 0;
-			print '<td>';
-			print price(round($clibip->getMargeAvecAchat($prop),2), 0, $langs, 1, 'MT', -1);
+			print '<td style="text-align: right;">';
+			print price(round($clibip->getMargeAvecAchat($prop),2), 0, $langs, 1, 'MT', -1).' €';
 			print '</td>';
-			$nb_total_margin += $clibip->getMargeAvecAchat($prop);
-			
-			
-			switch($tda->fk_statut){
-				case 0:
-					$statut = $langs->trans("Draft");
-					break;
-				case 1:
-					$statut = $langs->trans("Validated");
-					break;
-				case 2:
-					$statut = $langs->trans("Signed");
-					break;
-				case 3:
-					$statut = $langs->trans("Not Signed");
-					break;
-					
-			}
-			
+			$nb_total_margin += round($clibip->getMargeAvecAchat($prop),2);
+
 			//Tableau pour graphe pour les brouillons
 			if($tda->fk_statut == 0){
 				$i=0;
 				$exist = false;
 				while($i<count($tabDraft)){
-					if($u->lastname == $tabDraft[$i][0]){
-						$tabDraft[$i][1] +=  $clibip->getMargeAvecAchat($prop);
+					if($u->lastname.' '.$u->firstname == $tabDraft[$i][0]){
+						$tabDraft[$i][1] +=  round($clibip->getMargeAvecAchat($prop),2);
 						$exist = true;
 						
 					}
 					$i++;
 				}
 				if(!$exist){
-					$tabDraft[$i][0] = $u->lastname;
-					$tabDraft[$i][1] = $clibip->getMargeAvecAchat($prop);
+					$tabDraft[$i][0] = $u->lastname.' '.$u->firstname;
+					$tabDraft[$i][1] =round( $clibip->getMargeAvecAchat($prop),2);
 					
 				}
 			}else if($tda->fk_statut == 1){//Tableau pour graphe pour les validés
 				$i=0;
 				$exist = false;
 				while($i<count($tabValidated)){
-					if($u->lastname == $tabValidated[$i][0]){
-						$tabValidated[$i][1] +=  $clibip->getMargeAvecAchat($prop);
+					if($u->lastname.' '.$u->firstname == $tabValidated[$i][0]){
+						$tabValidated[$i][1] += round($clibip->getMargeAvecAchat($prop),2);
 						$exist = true;
 						
 					}
 					$i++;
 				}
 				if(!$exist){
-					$tabValidated[$i][0] = $u->lastname;
-					$tabValidated[$i][1] = $clibip->getMargeAvecAchat($prop);
+					$tabValidated[$i][0] = $u->lastname.' '.$u->firstname;
+					$tabValidated[$i][1] = round($clibip->getMargeAvecAchat($prop),2);
 					
 				}
 			}
@@ -254,22 +240,22 @@ function draw_table(&$TData, &$mesTabs) {
 				$i=0;
 				$exist = false;
 				while($i<count($tabSigned)){
-					if($u->lastname == $tabSigned[$i][0]){
-						$tabSigned[$i][1] +=  $clibip->getMargeAvecAchat($prop);
+					if($u->lastname.' '.$u->firstname == $tabSigned[$i][0]){
+						$tabSigned[$i][1] +=  round($clibip->getMargeAvecAchat($prop),2);
 						$exist = true;
 						
 					}
 					$i++;
 				}
 				if(!$exist){
-					$tabSigned[$i][0] = $u->lastname;
-					$tabSigned[$i][1] = $clibip->getMargeAvecAchat($prop);
+					$tabSigned[$i][0] = $u->lastname.' '.$u->firstname;
+					$tabSigned[$i][1] = round($clibip->getMargeAvecAchat($prop),2);
 					
 				}
 			}
 			
-			print '<td>';
-			print $statut;
+			print '<td align="right">';
+			print $prop->LibStatut($tda->fk_statut,5);
 			print '</td>';
 			print '</tr>';
 			$nb_total_sim++;
@@ -287,8 +273,8 @@ function draw_table(&$TData, &$mesTabs) {
 		print '<td>';
 		print $nb_total_sim;
 		print '</td>';
-		print '<td>';
-		print price(round($nb_total_margin,2), 0, $langs, 1, 'MT', -1);
+		print '<td align="right">';
+		print price(round($nb_total_margin,2), 0, $langs, 1, 'MT', -1).'€';
 		print '</td>';
 		print '<td>';
 		
