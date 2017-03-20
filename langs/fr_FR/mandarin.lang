@@ -23,21 +23,21 @@ subTitleHAxisGraphCAHoraire=Semaines
 
 # GRAPH COUT INTERIM
 MANDARIN_OBJECTIF_COUT_INTERIM=Valeur par défaut de l'objectif coût intérim (vide pour ne pas le voir apparaître sur le graphique)
-permGraphInterim=Autoriser la visualisation du graphique coût intérim (menu utilisateurs)
+permGraphInterim=Autoriser la visualisation du graphique coût intérim (menu sig)
 linkMenuGraphInterim=Graphique coût intérim
 titleGraphInterim=Coût intérim
 subTitleVAxisGraphInterim=Coût à la semaine
 subTitleHAxisGraphInterim=Semaines
 
 # GRAPH HEURES TRAVAILLEES
-permGraphTotalHeure=Autoriser la visualisation du graphique total heures travaillées (menu utilisateurs)
+permGraphTotalHeure=Autoriser la visualisation du graphique total heures travaillées (menu SIG)
 linkMenuGraphTotalHeure=Graphique heures travaillées
 titleGraphTotalHeure=Heures travaillées (CDI)
 subTitleVAxisGraphTotalHeure=Heures à la semaine
 subTitleHAxisGraphTotalHeure=Semaines
 
 # GRAPH EFFECTIF
-permGraphEffectif=Autoriser la visualisation du graphique de l'effectif (menu utilisateurs)
+permGraphEffectif=Autoriser la visualisation du graphique de l'effectif (menu SIG)
 linkMenuGraphEffectif=Graphique effectif
 titleGraphEffectif=Effectif
 subTitleVAxisGraphEffectif=Personnels
@@ -50,14 +50,14 @@ set_MANDARIN_GRAPH_TIME_ON_PERIOD=Afficher le rapport de temps saisi/capacité d
 
 # GRAPH HORAIRE MOYEN
 MANDARIN_HORAIRE_MOYEN_NOMAL=Valeur par défaut de l'horaire moyen (vide pour ne pas le voir apparaître sur le graphique)
-permGraphHoraireMoyen=Autoriser la visualisation du graphique horaire moyen (menu utilisateur)
+permGraphHoraireMoyen=Autoriser la visualisation du graphique horaire moyen (menu SIG)
 linkMenuGraphHoraireMoyen=Graphique horaire moyen
 titleGraphHoraireMoyen=Horaire moyen
 subTitleVAxisGraphHoraireMoyen=Heures
 subTitleHAxisGraphHoraireMoyen=Semaines
 
 # GRAPH PROPAL FACTURE
-permGraphPropalFacture=Autoriser la visualisation du rapport concernant les propal/facture par commercial (menu sig)
+permGraphPropalFacture=Autoriser la visualisation du rapport concernant les propal/facture par commercial (menu SIG)
 mandarinTitlePropalFactureCommercial=Commercial
 mandarinTitlePropalFactureNbPropal=Nb propositions
 mandarinTitlePropalFacturePropalPercentNotSigned=Pourcent non signée
@@ -74,7 +74,7 @@ titleGraphPercentCAPerCC=Pourcent CA par CC (%s)
 noData=Aucune donnée disponible
 
 #GRAPH EXCES TIMPESPENT
-permGraphProjectExceed=Autoriser la visualisation des projets en dépassement
+permGraphProjectExceed=Autoriser la visualisation des projets en dépassement (menu projet)
 linkMenuProjectExceedReport=Projets en dépassement
 ReportExceed=Rapport dépassement projet
 
@@ -99,6 +99,15 @@ EventType=Types d'événements
 mandarinTitleGraphEventByUser=Nombre d'événements par type et par commercial
 titleGraphEventByUser=Graphique du nombre d'événements par type
 
+# RAPPORT Moyenne des produits commandés, facturés et envoyés
+RapportMoyenneProduitsVendusCommandesEnvoyes=Moyenne par période des produits commandés, facturés ou envoyés (menu produit)
+AverageProducts=Moyennes par période
+AnalyzedData=Données analysées
+
+# Rapport temps moyen de réception des produits
+RapportTempsMoyenReceptionProduits=Temps moyen de réception des produits (menu produit)
+AverageReceipProducts=Tps moyen récep. produits
+
 # GRAPH PROJECT BY USER
 linkMenuProjectByUserReport=Nombre de projets par statut opportunité et par commercial
 linkMenuProjectByUserReportShort=Nb projets par commercial
@@ -117,7 +126,7 @@ set_MANDARIN_TRACE_COST_PRICE=Tracer les prix de revient
 GraphTraceCostPrice=Analyse des prix de revient
 RapportAnalyseCoutProductMP=Utilisation des matières premières
 RapportAnalyseCoutProduct=Analyse
-costPriceTraceGraph=Graphique d'analyse des prix de revient
+costPriceTraceGraph=Graphique d'analyse des prix de revient (menu asset)
 Percent=Pourcentage
 RapportAnalyseCoutProductPF=Fabrication de produit fini
 RapportAnalyseMotifRebus=Motif de déchets sur MP
@@ -138,3 +147,15 @@ monthJun=Juin
 monthJul=Juil
 monthAug=Aou
 ExportCSV=Export CSV
+
+# GRAPH DIFF VENTE PAR COMMERCIAL - DIFF ENTRE LES TOTAUX HT ET TTC (PROPAL / COMMANDE)
+permGraphDiffByCommercial=Autoriser la visualisation de la liste du diff entre HT/TTC propal/commande par commercial (menu commande)
+linkMenuGraphByCommercial=Diff Propal/Cmd
+titleGraphByCommercial=Différence HT/TTC des propals/commandes
+commercial=Commercial
+propal_amount_ht=Montant Propal HT
+propal_amount_ttc=Montant Propal TTC
+commande_amount_ht=Montant Commande HT
+commande_amount_ttc=Montant Commande TTC
+diff_ht=Diff HT
+diff_ttc=Diff TTC

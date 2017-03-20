@@ -2,8 +2,6 @@
 
 	require 'config.php';
 
-
-
 	if (!$user->rights->mandarin->graph->ca_client_month) accessforbidden();
 
 	llxHeader('', $langs->trans('CAClientMonth'), '');
@@ -15,6 +13,9 @@
 
 	$year = (int)GETPOST('year');
 	if(empty($year))$year=(int)date('Y');
+
+	$payed=GETPOST('payed');
+	$invoiced=GETPOST('invoiced');
 
 	$TYear = $TMonth = $ColFormat= $ColTotal =array();
 	$y = (int)date('Y');
@@ -36,6 +37,7 @@
 		//commande non brouillon par date de livraison
 		$sql = "SELECT commande.fk_soc, SUM(commande.total_ht) as total, MONTH(commande.date_livraison) as 'month' FROM ".MAIN_DB_PREFIX."commande as commande
 				INNER JOIN ".MAIN_DB_PREFIX."societe as soc ON soc.rowid=commande.fk_soc WHERE commande.fk_statut>0 AND YEAR(commande.date_livraison)=".$year."
+						".(empty($invoiced)?'AND facture=0':"AND facture=1")."
 				GROUP BY commande.fk_soc,soc.nom, MONTH(commande.date_livraison)
                 ORDER BY soc.nom,MONTH(commande.date_livraison)";
 	}
@@ -43,7 +45,7 @@
 		//facture payée sur date de facturation
 		$sql = "SELECT fact.fk_soc, SUM(fact.total) as total, MONTH(fact.datef) as 'month' FROM ".MAIN_DB_PREFIX."facture as fact
 				INNER JOIN ".MAIN_DB_PREFIX."societe as soc ON soc.rowid=fact.fk_soc
-						WHERE fk_statut>0 AND paye=1 AND YEAR(datef)=".$year."
+						WHERE fk_statut>0 ".(empty($payed)?'':"AND paye=1")." AND YEAR(datef)=".$year."
 								GROUP BY fact.fk_soc,soc.nom, MONTH(fact.datef)
 								ORDER BY soc.nom,MONTH(fact.datef)";
 	}
@@ -72,6 +74,11 @@
 
 	$headsearch = $formCore->hidden('mode', $mode );
 	$headsearch.= $formCore->combo($langs->trans('Year'), 'year', $TYear, $year);
+	if (empty($mode)) {
+		$headsearch.= $formCore->checkbox1($langs->trans('Paid'), 'payed', 1, $payed);
+	} elseif ($mode=='order') {
+		$headsearch.= $formCore->checkbox1($langs->trans('PropalStatusBilled'), 'invoiced', 1, $invoiced);
+	}
 	$headsearch.= $formCore->btsubmit($langs->trans('Ok'),'bt_ok');
 
 	$listeview = new TListviewTBS('CAClientMonth');
@@ -116,7 +123,7 @@ function _get_company_object(&$TRender){
 		$s=new Societe($db);
 		$s->fetch($fk_soc);
 
-		$line['client'] = $s->name;
+		$line['client'] = $s->getNomUrl();
 
 	}
 

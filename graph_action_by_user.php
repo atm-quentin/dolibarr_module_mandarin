@@ -110,7 +110,7 @@ function get_tab_label_action_comm() {
 	while($res = $db->fetch_object($resql)) {
 		$key=$langs->trans("Action".strtoupper($res->code));
         $label=($res->code && $key != "Action".strtoupper($res->code)?$key:$res->libelle);
-		$TLabel[$res->code] = $label;
+		$TLabel[$res->code] = html_entity_decode($label);
 	}
 	
 	return $TLabel;
